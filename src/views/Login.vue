@@ -32,7 +32,7 @@
                     </div>
                     <div>
                         <label for="title">Title</label>
-                        <input v-model.trim="signupForm.title" type="text" placeholder="Company" id="title" />
+                        <input v-model.trim="signupForm.title" type="text" placeholder="Username" id="title" />
                     </div>
                     <div>
                         <label for="email2">Email</label>
