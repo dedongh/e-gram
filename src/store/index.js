@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import * as fb from '../firebase'
+import * as fb from '../firebase1'
 import router from "../router/index";
 
 Vue.use(Vuex)

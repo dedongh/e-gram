@@ -10,7 +10,7 @@
 </template>
 
 <script>
-    import { commentsCollection, postsCollection, auth } from '../firebase'
+    import { commentsCollection, postsCollection, auth } from '../firebase1'
     export default {
         name: "CommentModal",
         props: [

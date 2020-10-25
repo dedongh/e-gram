@@ -17,7 +17,7 @@
 </template>
 
 <script>
-    import {auth} from '../firebase'
+    import {auth} from '../firebase1'
     export default {
         name: "PasswordReset",
         data: function () {
