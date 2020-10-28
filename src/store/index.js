@@ -87,6 +87,7 @@ const store = new Vuex.Store({
       await fb.postsCollection.add({
         createdOn: new Date(),
         content: post.content,
+        photo: post.photo,
         userId: fb.auth.currentUser.uid,
         userName: state.userProfile.name,
         comments: 0,
@@ -103,6 +104,7 @@ const store = new Vuex.Store({
       // check if user has liked post
       const doc = await fb.likesCollection.doc(docId).get()
       if (doc.exists) { return }
+
       // create post
       await fb.likesCollection.doc(docId).set({
         postId: post.id,

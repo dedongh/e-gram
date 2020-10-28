@@ -8,11 +8,18 @@
                 <div class="profile">
                     <h5>{{userProfile.name}}</h5>
                     <p>@{{userProfile.title}}</p>
+                    <p>@{{userProfile}}</p>
                     <div class="create-post">
                         <p>create a post</p>
-                        <form @submit.prevent>
+                        <form @submit.prevent ref="form">
                             <textarea v-model.trim="post.content"></textarea>
-                            <button @click="createPost" :disabled="post.content === ''" class="button">post</button>
+                            <input type="file" @change="previewImage" accept="image/*" >
+                            <p>Progress:
+                                <progress id="progress" :value="uploadValue" max="100" ></progress>
+                                {{uploadValue.toFixed()+"%"}}
+                            </p>
+                            <img height="300"  :src="picture" v-if="imageData != null" alt="...">
+                            <button @click="createPost()" :disabled="post.content === ''" class="button">post</button>
                         </form>
                     </div>
                 </div>
@@ -23,10 +30,12 @@
                         <h5>{{ post.userName }}</h5>
                         <span>{{ post.createdOn | formatDate }}</span>
                         <p>{{ post.content | trimLength }}</p>
+                        <img v-if="post.photo" :src="post.photo" height="200" alt="...">
                         <ul>
                             <li><a @click="toggleCommentModal(post)">comments {{ post.comments }}</a></li>
                             <li><a @click="likePost(post.id, post.likes)">likes {{ post.likes }}</a></li>
                             <li><a @click="viewPost(post)">view full post</a></li>
+                            <li><a  @click="deletePost(post)" style="color: red">delete</a></li>
                         </ul>
                     </div>
                 </div>
@@ -66,7 +75,8 @@
     import {mapState} from 'vuex'
     import moment from 'moment'
     import CommentModal from "../components/CommentModal";
-    import {commentsCollection} from "../firebase";
+    import {commentsCollection, postsCollection} from "../firebase";
+    import * as fb from '../firebase'
 
     export default {
         name: "Dashboard",
@@ -76,7 +86,8 @@
         data: function () {
             return {
                 post: {
-                    content:''
+                    content:'',
+                    photo: ''
                 },
                 showCommentModal: false,
                 selectedPost: {},
@@ -86,15 +97,44 @@
                 showPostModal: false,
                 fullPost: {},
                 postComments: [],
+                // image upload
+                imageData: null,
+                picture: null,
+                uploadValue: 0
+
             }
         },
         computed: {
-            ...mapState(['userProfile','posts'])
+            ...mapState(['userProfile','posts']),
         },
         methods: {
+            previewImage(event) {
+                this.uploadValue = 0
+                this.imageData = event.target.files[0]
+                this.picture = window.URL.createObjectURL(this.imageData)
+            },
             createPost() {
-                this.$store.dispatch('createPost', {content: this.post.content})
-                this.post.content = ''
+
+                const storageRef = fb.storage.ref('users/'+`${this.imageData.name}`).put(this.imageData)
+                storageRef.on('state_changed', snapshot => {
+                    this.uploadValue = (snapshot.bytesTransferred/snapshot.totalBytes)*100;
+                }, error => {
+                    console.log(error.message)
+                },
+                    () => {
+                    this.uploadValue = 100
+                        storageRef.snapshot.ref.getDownloadURL().then((url) => {
+                            this.post.photo = url
+                            this.$store.dispatch('createPost', {
+                                content: this.post.content,
+                                photo: url
+                            })
+                            this.post.content = ''
+                            this.imageData = null
+                            this.picture = ''
+                            this.$refs.form.reset()
+                        })
+                    })
             },
             toggleCommentModal(post) {
                 this.showCommentModal = !this.showCommentModal
@@ -109,6 +149,15 @@
             closePostModal() {
                 this.postComments = []
                 this.showPostModal = false
+            },
+            async deletePost(post) {
+                if (fb.auth.currentUser.uid === post.userId) {
+                    await postsCollection.doc(post.id).delete();
+                } else {
+                    alert("You can't delete this post...")
+                }
+
+
             },
             async viewPost(post) {
                 const docs = await commentsCollection.where('postId', '==', post.id).get()
