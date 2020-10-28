@@ -4,13 +4,13 @@ import 'firebase/firestore';
 import 'firebase/storage';
 
 const firebaseConfig = {
-    apiKey: 'AIzaSyCWNl2BdwQbBkq8Pvj1s_n0ecMbALoJu7U',
-    authDomain: 'kasa-7da25.firebaseapp.com',
-    databaseURL: 'https://kasa-7da25.firebaseio.com',
-    projectId: 'kasa-7da25',
-    storageBucket: 'kasa-7da25.appspot.com',
-    messagingSenderId: '756276944787',
-    appId: '1:756276944787:web:c85cfc733040a9d1045266'
+    apiKey: '',
+    authDomain: '',
+    databaseURL: '',
+    projectId: '',
+    storageBucket: '',
+    messagingSenderId: '',
+    appId: ''
 }
 firebase.initializeApp(firebaseConfig)
 
